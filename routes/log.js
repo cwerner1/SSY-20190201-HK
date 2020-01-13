@@ -8,8 +8,8 @@ let currentPartition = 1;
 let maxPartition = config.num_partitions;
 
 router.post("/", function (req, res, next) {
-
     let currentUrl = url + currentPartition;
+
     Request.post({
             url: currentUrl,
             json: req.body,
@@ -19,7 +19,8 @@ router.post("/", function (req, res, next) {
             res.json(JSON.parse(cresponse.body));
         });
 
-    currentPartition = ((currentPartition++) % maxPartition)+1;
+
+    currentPartition = ((currentPartition++) % maxPartition) + 1;
 });
 
 
