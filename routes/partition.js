@@ -11,12 +11,37 @@ function routerForStreamLog(instance, partition) {
     router.post("/", function (req, res, next) {
 
         db.getPartitionCollection(instance, partition).insert(req.body);
-        res.json(true);
+        if (instance !== 1) {
+            // Erste Instance gibt direkt das Ergebnis retour
+            res.json(true);
+        } else {
+            // Alle Anderen Instance warten auf eine mindest anzahl an Commits
+            let numResponses = 0;
+            let responseSend = false;
+            for (let i = 2; i <= config.num_instances; i++) {
+                let currentUrl = "http://127.0.0.1:3000/instance/" + i + "/partition/" + partition + "/";
+                let my_data = req.body;
+                delete my_data.$loki;
+                delete my_data.meta;
+                Request.post({
+                        url: currentUrl + "?replica",
+                        json: my_data
+                    },
+                    function (cerror, cresponse, cbody) {
+                        numResponses++;
+                        if (!responseSend && numResponses >= config.num_replica_commits) {
+                            res.json(true).end();
+                            responseSend = true;
+                        }
+                    });
+            }
+        }
+
     });
 
     router.get("/:id", function (req, res, next) {
         let entry = db.getPartitionCollection(instance, partition).get(req.params.id);
-        if(entry===null){
+        if (entry === null) {
             return res.status(204).end();
         }
         res.json(entry);
