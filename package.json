@@ -13,7 +13,7 @@
     "express": "^4.17.1",
     "lokijs": "^1.5.11",
     "morgan": "^1.10.0",
-    "request": "^2.88.0",
+    "request": "^2.88.2",
     "yarn": "^1.22.10"
   },
   "devDependencies": {
